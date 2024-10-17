@@ -1,6 +1,6 @@
 from flask import Flask, render_template, jsonify, request
 import asyncio
-from RizuNyannewmeup import add_song_to_queue, skip_current_song
+from RizuNyannewmeup import add_song_to_queue, get_queue, skip_current_song,bot_task,get_playing,play_next,skip
 
 app = Flask(__name__)
 
@@ -31,14 +31,38 @@ def add_song():
 
 # Route to skip the current song
 @app.route('/skip-song', methods=['POST'])
-def skip_song():
-    try:
-        run_async(skip_current_song())  # Run the async function synchronously
-        return jsonify({'message': 'Skipped current song'}), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+async def skip_song():
+    ctx= get_playing()[0]
+    await skip(ctx)
+    # try:
+    #     run_async(skip_current_song())  # Run the async function synchronously
+    #     return jsonify({'message': 'Skipped current song'}), 200
+    # except Exception as e:
+    #     return jsonify({'error': str(e)}), 500
 
+@app.route('/play-song', methods=['POST'])
+async def play_song():
+    ctx= get_playing()[0]
+    if not ctx.voice_client.is_playing():
+        await play_next(ctx)
+        
+        
+@app.route('/queue', methods=['GET'])
+async def web_queue():
+    return get_queue()
+
+def web():
+    # app.use_reloader=False
+    app.run(debug=False)
+
+async def main():
+    # bottask = asyncio.create_task(bot_task())
+    a=asyncio.to_thread(web)
+    b=asyncio.to_thread(bot_task)
+    asyncio.gather(a,b)
+    # await bottask
+    
+
+    # print(app.url_map)
 if __name__ == "__main__":
-    print(app.url_map)
-    app.run(debug=True)
-    print(app.url_map)
+    asyncio.run(main())

@@ -20,6 +20,10 @@
     <h3>Controls</h3>
     <button onclick="skipSong()">Skip Song</button>
 
+    <button onclick="playSong()">Play Song</button>
+
+    <button onclick="window.location=`/queue`">Queue</button>
+
     <script>
         function addSong() {
             const songUrl = document.getElementById('song-url').value;
@@ -30,6 +34,27 @@
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({ url: songUrl }),
+                })
+                .then(response => response.body)
+                .then(data => {
+                    console.log(data)
+                })
+                .catch(error => {
+                    console.error(error);
+                    alert('Error adding song');
+        
+                });
+            }
+        }
+        function playSong() {
+            const songUrl = document.getElementById('song-url').value;
+            if (songUrl) {
+                fetch('/play-song', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    // body: JSON.stringify({ url: songUrl }),
                 })
                 .then(response => response.body)
                 .then(data => {

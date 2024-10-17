@@ -13,12 +13,14 @@ bot = commands.Bot(command_prefix='=', intents=intents)
 # Global variable to hold the song queue
 song_queue = []
 
+playing=[]
+
+def get_queue():
+    return song_queue
+
 # Sanitize the filename
 def sanitize_filename(filename):
     return re.sub(r'[<>:"/\\|?*]', '_', filename)  # Replace invalid characters with underscores
-
-# Create downloads directory if it doesn't exist
-os.makedirs('downloads', exist_ok=True)
 
 # Download song function
 async def download_song(url):
@@ -77,12 +79,17 @@ async def skip_current_song():
     else:
         print("No song to skip.")
 
+
+def get_playing():
+    return playing
+
 # Command to join a voice channel
 @bot.command(name='join')
 async def join(ctx):
     if ctx.author.voice:
         channel = ctx.author.voice.channel
         await channel.connect()
+        playing.append(ctx)
         await ctx.send(f'Joined {channel}')
     else:
         await ctx.send('You need to be in a voice channel to use this command.')
@@ -93,7 +100,6 @@ async def play(ctx, url: str):
     if ctx.voice_client is None:
         await ctx.send("I am not connected to a voice channel. Please join a voice channel first.")
         return
-    
     await ctx.send(f"Downloading song from: {url}")
     try:
         await add_song_to_queue(url)  # Pass only the url
@@ -112,13 +118,30 @@ async def play_next(ctx):
         current_song = song_queue.pop(0)  # Get and remove the first song in the queue
         
         if os.path.exists(current_song):
-            ctx.voice_client.play(discord.FFmpegPCMAudio(current_song), after=lambda e: asyncio.run_coroutine_threadsafe(play_next(ctx), bot.loop))
+            ctx.voice_client.play(discord.FFmpegOpusAudio(current_song), after=lambda e: asyncio.run_coroutine_threadsafe(play_next(ctx), bot.loop))
             await ctx.send(f'Now playing: {os.path.basename(current_song)}')  # Send the name of the currently playing song
         else:
             await ctx.send(f"Error: Could not play {os.path.basename(current_song)}")
             await skip_current_song()  # Skip if the file is invalid
     else:
         await ctx.send("Queue is empty")
+        
+        
+        
+# Play the next song
+async def play_next_lean(vc):
+    if song_queue:
+        current_song = song_queue.pop(0)  # Get and remove the first song in the queue
+        
+        if os.path.exists(current_song):
+            vc.play(discord.FFmpegOpusAudio(current_song), after=lambda e: asyncio.run_coroutine_threadsafe(play_next(vc), bot.loop))
+            # await ctx.send(f'Now playing: {os.path.basename(current_song)}')  # Send the name of the currently playing song
+        else:
+            # await ctx.send(f"Error: Could not play {os.path.basename(current_song)}")
+            await skip_current_song()  # Skip if the file is invalid
+    else:
+        pass
+        # await ctx.send("Queue is empty")
 
 # Command to skip the current song
 @bot.command(name='skip')
@@ -164,6 +187,15 @@ async def leave(ctx):
         await ctx.send('Disconnected from the voice channel.')
     else:
         await ctx.send('I am not in a voice channel.')
+def get_playing():
+    return playing
 
-# Run the bot
-bot.run('')
+def bot_task():
+    print("hihihihi")
+    # Create downloads directory if it doesn't exist
+    os.makedirs('downloads', exist_ok=True)
+    # Run the bot
+    # print(a)
+    # a=bot.connect()
+    # return a
+    bot.run(os.environ.get("DISCORD_TOKEN"))
