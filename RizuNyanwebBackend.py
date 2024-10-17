@@ -1,7 +1,7 @@
 from flask import Flask, render_template, jsonify, request
 import asyncio
 from RizuNyannewmeup import add_song_to_queue, get_queue, skip_current_song,bot_task,get_playing,play_next,skip
-
+from dotenv import load_dotenv
 app = Flask(__name__)
 
 # Route to serve the HTML page
@@ -65,4 +65,7 @@ async def main():
 
     # print(app.url_map)
 if __name__ == "__main__":
+    load_dotenv()
     asyncio.run(main())
+
+#python RizuNyanwebBackend.py
