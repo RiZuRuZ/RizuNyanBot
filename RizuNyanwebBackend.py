@@ -66,6 +66,10 @@ async def main():
     # print(app.url_map)
 if __name__ == "__main__":
     load_dotenv()
+<<<<<<< HEAD
     asyncio.run(main())
 
 #python RizuNyanwebBackend.py
+=======
+    asyncio.run(main())
+>>>>>>> 8ac23579c7987ad35855c1a16a4919621ffc96a8
