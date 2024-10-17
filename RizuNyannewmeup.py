@@ -152,6 +152,14 @@ async def skip(ctx):
     else:
         await ctx.send('No music is currently playing.')
 
+# Command to see the current queue
+@bot.command(name='queue')
+async def queue(ctx):
+    if song_queue:
+        await ctx.send('Current queue:\n' + '\n'.join(song_queue))
+    else:
+        await ctx.send('Queue is empty.')
+        
 # Command to stop the music
 @bot.command(name='stop')
 async def stop(ctx):
