@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RizuNyan Music Bot</title>
+</head>
+<body>
+    <h1>RizuNyan Music Bot</h1>
+
+    <h2>Song Queue</h2>
+    <ul id="song-list">
+        <!-- Songs will be listed here dynamically -->
+    </ul>
+
+    <h3>Add a Song</h3>
+    <input type="text" id="song-url" placeholder="Enter song URL" />
+    <button onclick="addSong()">Add Song</button>
+
+    <h3>Controls</h3>
+    <button onclick="skipSong()">Skip Song</button>
+
+    <script>
+        function addSong() {
+            const songUrl = document.getElementById('song-url').value;
+            if (songUrl) {
+                fetch('/add-song', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url: songUrl }),
+                })
+                .then(response => response.body)
+                .then(data => {
+                    console.log(data)
+                })
+                .catch(error => {
+                    console.error(error);
+                    alert('Error adding song');
+        
+                });
+            }
+        }
+
+        function skipSong() {
+            fetch('/skip-song', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error); // Show error message
+                    } else {
+                        alert(data.message);
+                        // Optionally, refresh the song list here as well
+                        // updateSongList(); // Call a function to refresh the displayed song list
+                    }
+                })
+                .catch(error => {
+                    alert('Error skipping song');
+                });
+        }
+
+        // Optional: Function to fetch and update the song list from the server
+        // function updateSongList() {
+        //     fetch('/get-songs') // You'd need to implement this route
+        //         .then(response => response.json())
+        //         .then(data => {
+        //             const songList = document.getElementById('song-list');
+        //             songList.innerHTML = ''; // Clear the current list
+        //             data.songs.forEach(song => {
+        //                 const li = document.createElement('li');
+        //                 li.textContent = song;
+        //                 songList.appendChild(li);
+        //             });
+        //         });
+        // }
+    </script>
+</body>
+</html>
